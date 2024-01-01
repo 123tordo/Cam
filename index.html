@@ -278,6 +278,9 @@
                         // Show "Lance o dado outra vez" for 10 seconds
                         questionContainer.innerHTML = "<h1>Lança o dado outra vez e lê o código para um novo desafio</h1>";
                         setTimeout(() => {
+                            // Close the page after 10 seconds
+                            window.close();
+
                             // Open the back camera on mobile devices
                             openBackCamera();
                         }, 10000);
@@ -292,7 +295,7 @@
 
             if (isMobile) {
                 // Open the back camera using the Camera API for mobile devices
-               navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                     .then((stream) => {
                         // Use the stream or perform any other camera-related actions
                         console.log('Back camera opened successfully.');
