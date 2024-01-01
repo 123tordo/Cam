@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Art Quiz</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black; /* Black background color */
+            color: #ecf0f1; /* Light grey text color */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        #question-container {
+            padding: 20px;
+            border: 2px solid #e74c3c; /* Red border color */
+            border-radius: 10px; /* Rounded corners */
+            background-color: #2c3e50; /* Dark grey background color */
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #e74c3c; /* Red color for headers */
+            margin-bottom: 20px;
+        }
+
+        #countdown {
+            margin-top: 10px;
+        }
+
+        .answer {
+            color: yellow; /* Yellow color for answers */
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const questionContainer = document.createElement("div");
+        const countdownElement = document.createElement("div");
+
+        document.body.appendChild(questionContainer);
+
+        const allArtQuestions = [
+            // ... (your questions array remains unchanged)
+        ];
+
+        function displayRandomQuestion() {
+            const randomIndex = Math.floor(Math.random() * allArtQuestions.length);
+            const currentQuestion = allArtQuestions[randomIndex];
+
+            questionContainer.innerHTML = `<h1>${currentQuestion.question}</h1>`;
+            questionContainer.appendChild(countdownElement);
+
+            // Show the countdown for 15 seconds
+            let secondsLeft = 15;
+            countdownElement.textContent = `Tempo restante: ${secondsLeft}s`;
+
+            const countdownInterval = setInterval(() => {
+                secondsLeft--;
+
+                if (secondsLeft >= 0) {
+                    countdownElement.textContent = `Tempo restante: ${secondsLeft}s`;
+                } else {
+                    clearInterval(countdownInterval);
+
+                    // Show the answer for 6 seconds
+                    questionContainer.innerHTML += `<h1 class="answer">Resposta: ${currentQuestion.answer}</h1>`;
+                    setTimeout(() => {
+                        // Show "Lance o dado outra vez" for 10 seconds
+                        questionContainer.innerHTML = "<h1>Lança o dado outra vez e lê o código para um novo desafio</h1>";
+                        setTimeout(() => {
+                            // Open the back camera on mobile devices
+                            openBackCamera();
+                        }, 10000);
+                    }, 10000);
+                }
+            }, 1000);
+        }
+
+        function openBackCamera() {
+            // Check if the device is a mobile device
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // Open the back camera using the Camera API for mobile devices
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then((stream) => {
+                        // Use the stream or perform any other camera-related actions
+                        console.log('Back camera opened successfully.');
+                    })
+                    .catch((error) => {
+                        console.error('Error opening the back camera:', error);
+                    });
+            }
+        }
+
+        displayRandomQuestion(); // Initial call to start the quiz
+    });
+</script>
+
+</body>
+</html>
