@@ -25,6 +25,10 @@
             display: none; /* Initially hide the video element */
         }
 
+        canvas {
+            display: none; /* Initially hide the canvas element */
+        }
+
         button {
             background-color: #3498db;
             color: white;
@@ -74,6 +78,26 @@
                     document.body.appendChild(video);
                     video.srcObject = stream;
                     video.play();
+
+                    // Use a canvas to display the video stream
+                    const canvas = document.createElement("canvas");
+                    document.body.appendChild(canvas);
+                    const ctx = canvas.getContext("2d");
+
+                    video.addEventListener("loadedmetadata", () => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.style.display = "block";
+                        video.style.display = "none";
+                    });
+
+                    // Continuously draw frames from the video to the canvas
+                    const drawFrame = () => {
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        requestAnimationFrame(drawFrame);
+                    };
+
+                    drawFrame();
                 })
                 .catch((error) => {
                     console.error('Error accessing the camera:', error);
