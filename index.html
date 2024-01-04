@@ -33,6 +33,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            display: none; /* Initially hide the button */
         }
     </style>
 </head>
@@ -48,10 +49,6 @@
         const helloText = document.getElementById("helloText");
         const cameraButton = document.getElementById("cameraButton");
         const cameraStream = document.getElementById("cameraStream");
-
-        // Variables for QR code scanning
-        let videoStream;
-        let scanning = false;
 
         // Show "Hello" for 5 seconds
         setTimeout(() => {
@@ -73,62 +70,12 @@
                     // Display the camera stream in a video element
                     cameraStream.style.display = "block";
                     cameraStream.srcObject = stream;
-                    videoStream = stream;
                     cameraStream.play();
-
-                    // Start QR code scanning
-                    startScanning();
                 })
                 .catch((error) => {
                     console.error('Error accessing the camera:', error);
                 });
         });
-
-        // Function to start QR code scanning
-        function startScanning() {
-            if (!scanning) {
-                scanning = true;
-
-                // Use requestAnimationFrame for optimal performance
-                function scan() {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = cameraStream.videoWidth;
-                    canvas.height = cameraStream.videoHeight;
-                    const context = canvas.getContext("2d");
-                    context.drawImage(cameraStream, 0, 0, canvas.width, canvas.height);
-
-                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                    if (code) {
-                        // QR code found, you can access the code with code.data
-                        console.log("QR Code detected:", code.data);
-                        // Stop scanning
-                        stopScanning();
-                    }
-
-                    if (scanning) {
-                        requestAnimationFrame(scan);
-                    }
-                }
-
-                requestAnimationFrame(scan);
-            }
-        }
-
-        // Function to stop QR code scanning
-        function stopScanning() {
-            scanning = false;
-
-            // Stop the video stream
-            if (videoStream) {
-                const tracks = videoStream.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-
-            // Hide the video element
-            cameraStream.style.display = "none";
-        }
     });
 </script>
 
