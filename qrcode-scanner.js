@@ -1,5 +1,4 @@
 import { html, css, LitElement } from "https://unpkg.com/lit?module";
-import { Html5QrcodeScanner } from "https://unpkg.com/html5-qrcode?module";
 
 export class QRCodeScanner extends LitElement {
   static styles = css`
@@ -11,39 +10,46 @@ export class QRCodeScanner extends LitElement {
   render() {
     return html`
       <style>
-        #reader {
+        #video {
           width: 100%;
           max-width: 350px;
           height: 250px;
         }
       </style>
-      <div id="reader"></div>
+      <video id="video" playsinline autoplay></video>
       <div>${this.decodedText}</div>
       <div>${this.errorMessage}</div>
     `;
   }
 
   firstUpdated() {
-    const onScanSuccess = (decodedText, decodedResult) => {
-      this.decodedText = decodedText;
+    const video = this.shadowRoot.querySelector("#video");
+
+    const onSuccess = (stream) => {
+      video.srcObject = stream;
+
+      const track = stream.getVideoTracks()[0];
+      const imageCapture = new ImageCapture(track);
+
+      const scanQRCode = async () => {
+        const bitmap = await imageCapture.grabFrame();
+        const code = jsQR(bitmap.data, bitmap.width, bitmap.height);
+
+        if (code) {
+          this.decodedText = code.data;
+        }
+      };
+
+      setInterval(scanQRCode, 1000);
     };
 
-    const onScanFailure = (errorMessage, error) => {
-      this.errorMessage = errorMessage;
+    const onError = (error) => {
+      this.errorMessage = `Error accessing camera: ${error}`;
     };
 
-    const config = {
-      fps: 10,
-      qrbox: {
-        width: 350,
-        height: 250,
-      },
-    };
-
-    const reader = this.shadowRoot.querySelector("#reader");
-    const html5QrcodeScanner = new Html5QrcodeScanner(reader, config);
-
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(onSuccess)
+      .catch(onError);
   }
 }
 
