@@ -10,6 +10,13 @@ export class QRCodeScanner extends LitElement {
 
   render() {
     return html`
+      <style>
+        #reader {
+          width: 100%;
+          max-width: 350px;
+          height: 250px;
+        }
+      </style>
       <div id="reader"></div>
       <div>${this.decodedText}</div>
       <div>${this.errorMessage}</div>
@@ -18,12 +25,10 @@ export class QRCodeScanner extends LitElement {
 
   firstUpdated() {
     const onScanSuccess = (decodedText, decodedResult) => {
-      // handle the scanned code as you like
       this.decodedText = decodedText;
     };
 
     const onScanFailure = (errorMessage, error) => {
-      // handle scan failure, usually better to ignore and keep scanning
       this.errorMessage = errorMessage;
     };
 
