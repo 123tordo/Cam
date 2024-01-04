@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
+    <!-- Include the Html5QrcodeScanner script -->
+    <script src="https://github.com/mebjas/html5-qrcode"></script>
     <style>
         body {
             margin: 0;
@@ -13,45 +15,79 @@
             justify-content: center;
             height: 100vh;
             background-color: black; /* Black background color */
+            color: #ecf0f1; /* Light grey text color */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 18px;
+            text-align: center;
         }
 
-        #interactive.viewport {
-            width: 100%;
-            max-width: 800px;
-            height: 100%;
+        #reader {
+            width: 80%;
+            max-width: 600px;
             border: 2px solid #e74c3c; /* Red border color */
             border-radius: 10px; /* Rounded corners */
+            background-color: #2c3e50; /* Dark grey background color */
+        }
+
+        #startButton,
+        #stopButton {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #3498db; /* Blue button color */
+            color: #fff; /* White text color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
 
-<div id="interactive" class="viewport"></div>
-
-<script src="https://unpkg.com/@zxing/library@0.23.0"></script>
-<script src="https://unpkg.com/ngx-scanner@3.1.1"></script>
+<div id="reader"></div>
+<button id="startButton">Start Scanning</button>
+<button id="stopButton">Stop Scanning</button>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const scanner = new ZXing.BrowserQRCodeReader();
+        const html5QrCode = new Html5Qrcode("reader");
+        const startButton = document.getElementById("startButton");
+        const stopButton = document.getElementById("stopButton");
 
-        scanner.getVideoInputDevices()
-            .then((videoInputDevices) => {
-                const deviceId = videoInputDevices[1].deviceId; // Use the back camera
-                scanner.decodeFromInputVideoDevice(deviceId, 'interactive', (result, err) => {
-                    if (result) {
-                        // QR code detected, result contains the decoded information
-                        console.log(result.getText());
-                        // You can navigate to the URL or perform any action based on the result
-                        // window.location.href = result.getText();
-                    } else if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error(err);
-                    }
-                });
-            })
-            .catch((err) => {
-                console.error(err);
+        // Function to start scanning
+        function startScanning() {
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            // Start scanning
+            html5QrCode.start(
+                { facingMode: "environment" }, // Use the back camera
+                config,
+                (decodedText, decodedResult) => {
+                    console.log(`Code matched = ${decodedText}`, decodedResult);
+                    // Handle the scanned code as needed
+                },
+                (errorMessage) => {
+                    console.warn(`Code scan error = ${errorMessage}`);
+                    // Handle scan failure, usually better to ignore and keep scanning
+                }
+            ).catch((err) => {
+                console.error('Error starting scanner:', err);
             });
+        }
+
+        // Function to stop scanning
+        function stopScanning() {
+            // Stop scanning
+            html5QrCode.stop().then(() => {
+                console.log('QR Code scanning is stopped.');
+            }).catch((err) => {
+                console.error('Error stopping scanner:', err);
+            });
+        }
+
+        // Attach event listeners to buttons
+        startButton.addEventListener("click", startScanning);
+        stopButton.addEventListener("click", stopScanning);
     });
 </script>
 
