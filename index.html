@@ -57,72 +57,60 @@
 <button onclick="toggleCamera()">Switch Camera</button>
 <button onclick="scanQRCode()">Scan QR Code</button>
 
-<script src="https://unpkg.com/@zxing/library@0.24.0"></script>
+<script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const videoElement = document.getElementById('video');
         let currentFacingMode = 'user';
-        let codeReader;
+        let scanner;
 
         // Function to toggle between front and back cameras
         window.toggleCamera = function () {
             currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
 
             // Re-initialize the camera stream with the new facingMode
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
-                .then(function (stream) {
-                    videoElement.srcObject = stream;
-                    startCodeReader();
-                })
-                .catch(function (error) {
-                    console.error('Error toggling camera:', error);
-                });
+            scanner.stop().then(() => {
+                startInstaScan();
+            });
         };
 
-        // Function to start the QR code reader
-        window.startCodeReader = function () {
-            const codeReaderConfig = { videoElement: videoElement };
-            codeReader = new ZXing.BrowserQRCodeReader();
-            codeReader.decodeOnceFromVideoDevice(undefined, 'video', codeReaderConfig)
-                .then(result => {
-                    alert('QR Code scanned: ' + result.text);
-                })
-                .catch(err => {
-                    console.error('Error decoding QR code:', err);
-                });
+        // Function to start the InstaScan QR code reader
+        window.startInstaScan = function () {
+            scanner = new Instascan.Scanner({ video: videoElement, mirror: false });
+            Instascan.Camera.getCameras().then(function (cameras) {
+                if (cameras.length > 0) {
+                    const selectedCamera = cameras.find(camera => camera.facing === currentFacingMode);
+                    scanner.start(selectedCamera);
+                } else {
+                    console.error('No cameras found.');
+                }
+            }).catch(function (error) {
+                console.error('Error getting cameras:', error);
+            });
+
+            scanner.addListener('scan', function (content) {
+                alert('QR Code scanned: ' + content);
+            });
         };
 
-        // Function to stop the QR code reader
-        window.stopCodeReader = function () {
-            if (codeReader) {
-                codeReader.stopContinuousDecode();
+        // Function to stop the InstaScan QR code reader
+        window.stopInstaScan = function () {
+            if (scanner) {
+                scanner.stop();
             }
         };
 
         // Function to scan QR code once
         window.scanQRCode = function () {
-            if (codeReader) {
-                codeReader.decodeOnceFromVideoDevice(undefined, 'video')
-                    .then(result => {
-                        alert('QR Code scanned: ' + result.text);
-                    })
-                    .catch(err => {
-                        console.error('Error decoding QR code:', err);
-                    });
+            if (scanner) {
+                scanner.scan();
             }
         };
 
         // Check if getUserMedia is available
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
-                .then(function (stream) {
-                    videoElement.srcObject = stream;
-                    startCodeReader();
-                })
-                .catch(function (error) {
-                    console.error('Error accessing camera:', error);
-                });
+            startInstaScan();
         } else {
             console.error('getUserMedia is not supported in this browser');
         }
@@ -131,3 +119,4 @@
 
 </body>
 </html>
+
