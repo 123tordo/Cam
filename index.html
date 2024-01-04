@@ -58,6 +58,7 @@
 </div>
 
 <button onclick="toggleCamera()">Switch Camera</button>
+<button onclick="scanQRCode()">Scan QR Code</button>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -80,6 +81,17 @@
                 });
         };
 
+        // Function to start scanning for QR codes
+        window.scanQRCode = function () {
+            if (scanner) {
+                scanner.scan().then(function (content) {
+                    alert('QR Code scanned: ' + content);
+                }).catch(function (error) {
+                    console.error('Error scanning QR code:', error);
+                });
+            }
+        };
+
         // Check if getUserMedia is available
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
@@ -88,12 +100,6 @@
 
                     // Initialize the QR code scanner
                     scanner = new Instascan.Scanner({ video: videoElement });
-                    scanner.addListener('scan', function (content) {
-                        alert('QR Code scanned: ' + content);
-                    });
-
-                    // Start the scanner
-                    scanner.start(videoElement);
                 })
                 .catch(function (error) {
                     console.error('Error accessing camera:', error);
@@ -106,4 +112,3 @@
 
 </body>
 </html>
-
