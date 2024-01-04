@@ -34,6 +34,17 @@
             border-radius: 10px; /* Rounded corners */
             background-color: #2c3e50; /* Dark grey background color */
         }
+
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #3498db; /* Blue button color */
+            color: #fff; /* White button text color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -42,13 +53,30 @@
     <video id="video" autoplay playsinline></video>
 </div>
 
+<button onclick="toggleCamera()">Switch Camera</button>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const videoElement = document.getElementById('video');
+        let currentFacingMode = 'user';
+
+        // Function to toggle between front and back cameras
+        window.toggleCamera = function () {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+
+            // Re-initialize the camera stream with the new facingMode
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
+                .then(function (stream) {
+                    videoElement.srcObject = stream;
+                })
+                .catch(function (error) {
+                    console.error('Error toggling camera:', error);
+                });
+        };
 
         // Check if getUserMedia is available
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
                 .then(function (stream) {
                     videoElement.srcObject = stream;
                 })
