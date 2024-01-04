@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Reader</title>
+    <title>QR Code Scanner</title>
     <style>
         body {
             margin: 0;
@@ -48,35 +48,9 @@
 
         // Check if getUserMedia is available
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
                 .then(function (stream) {
                     videoElement.srcObject = stream;
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-
-                    videoElement.addEventListener('loadedmetadata', function () {
-                        canvas.width = videoElement.videoWidth;
-                        canvas.height = videoElement.videoHeight;
-                    });
-
-                    const decodeFrame = function () {
-                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-                        // For simplicity, use a basic QR code decoding library (jsQR)
-                        const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                        if (code) {
-                            console.log('Decoded QR code:', code.data);
-                            // Handle the decoded result (e.g., redirect to a URL)
-                            window.location.href = code.data;
-                        }
-
-                        requestAnimationFrame(decodeFrame);
-                    };
-
-                    decodeFrame();
                 })
                 .catch(function (error) {
                     console.error('Error accessing camera:', error);
