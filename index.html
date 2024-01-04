@@ -21,22 +21,7 @@
 
         video {
             width: 100%;
-            height: 100vh;
-            display: none; /* Initially hide the video element */
-        }
-
-        canvas {
-            display: none; /* Initially hide the canvas element */
-        }
-
-        button {
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
-            font-size: 20px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
+            height: 100%;
         }
     </style>
 </head>
@@ -54,58 +39,20 @@
             // Hide the "Hello" text
             helloElement.style.display = "none";
 
-            // Show button to open the camera
-            const button = document.createElement("button");
-            button.textContent = "Open Camera";
-            document.body.appendChild(button);
-
-            button.addEventListener("click", openBackCamera);
-        }, 5000);
-    });
-
-    function openBackCamera() {
-        // Check if the device supports mediaDevices.getUserMedia
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // Access the user's camera
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then((stream) => {
-                    // Hide the button
-                    const button = document.querySelector("button");
-                    button.style.display = "none";
-
                     // Display the camera stream in a video element
                     const video = document.createElement("video");
                     document.body.appendChild(video);
                     video.srcObject = stream;
                     video.play();
-
-                    // Use a canvas to display the video stream
-                    const canvas = document.createElement("canvas");
-                    document.body.appendChild(canvas);
-                    const ctx = canvas.getContext("2d");
-
-                    video.addEventListener("loadedmetadata", () => {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
-                        canvas.style.display = "block";
-                        video.style.display = "none";
-                    });
-
-                    // Continuously draw frames from the video to the canvas
-                    const drawFrame = () => {
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        requestAnimationFrame(drawFrame);
-                    };
-
-                    drawFrame();
                 })
                 .catch((error) => {
                     console.error('Error accessing the camera:', error);
                 });
-        } else {
-            console.error('getUserMedia is not supported on this device.');
-        }
-    }
+        }, 5000);
+    });
 </script>
 
 </body>
