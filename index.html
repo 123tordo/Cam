@@ -47,9 +47,6 @@
             font-size: 16px;
         }
     </style>
-
-    <!-- Include instascan library -->
-    <script src="https://cdn.rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 </head>
 <body>
 
@@ -60,11 +57,13 @@
 <button onclick="toggleCamera()">Switch Camera</button>
 <button onclick="scanQRCode()">Scan QR Code</button>
 
+<script src="https://unpkg.com/@zxing/library@0.24.0"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const videoElement = document.getElementById('video');
         let currentFacingMode = 'user';
-        let scanner;
+        let codeReader;
 
         // Function to toggle between front and back cameras
         window.toggleCamera = function () {
@@ -74,21 +73,43 @@
             navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
                 .then(function (stream) {
                     videoElement.srcObject = stream;
-                    scanner.start(videoElement);
+                    startCodeReader();
                 })
                 .catch(function (error) {
                     console.error('Error toggling camera:', error);
                 });
         };
 
-        // Function to start scanning for QR codes
-        window.scanQRCode = function () {
-            if (scanner) {
-                scanner.scan().then(function (content) {
-                    alert('QR Code scanned: ' + content);
-                }).catch(function (error) {
-                    console.error('Error scanning QR code:', error);
+        // Function to start the QR code reader
+        window.startCodeReader = function () {
+            const codeReaderConfig = { videoElement: videoElement };
+            codeReader = new ZXing.BrowserQRCodeReader();
+            codeReader.decodeOnceFromVideoDevice(undefined, 'video', codeReaderConfig)
+                .then(result => {
+                    alert('QR Code scanned: ' + result.text);
+                })
+                .catch(err => {
+                    console.error('Error decoding QR code:', err);
                 });
+        };
+
+        // Function to stop the QR code reader
+        window.stopCodeReader = function () {
+            if (codeReader) {
+                codeReader.stopContinuousDecode();
+            }
+        };
+
+        // Function to scan QR code once
+        window.scanQRCode = function () {
+            if (codeReader) {
+                codeReader.decodeOnceFromVideoDevice(undefined, 'video')
+                    .then(result => {
+                        alert('QR Code scanned: ' + result.text);
+                    })
+                    .catch(err => {
+                        console.error('Error decoding QR code:', err);
+                    });
             }
         };
 
@@ -97,9 +118,7 @@
             navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } })
                 .then(function (stream) {
                     videoElement.srcObject = stream;
-
-                    // Initialize the QR code scanner
-                    scanner = new Instascan.Scanner({ video: videoElement });
+                    startCodeReader();
                 })
                 .catch(function (error) {
                     console.error('Error accessing camera:', error);
