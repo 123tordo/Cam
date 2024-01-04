@@ -9,107 +9,49 @@
             margin: 0;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             background-color: black; /* Black background color */
-            color: #ecf0f1; /* Light grey text color */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 28px;
-            text-align: center;
         }
 
-        #video-container {
+        #interactive.viewport {
             width: 100%;
-            height: 70%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        video {
-            width: 80%;
             max-width: 800px;
+            height: 100%;
             border: 2px solid #e74c3c; /* Red border color */
             border-radius: 10px; /* Rounded corners */
-            background-color: #2c3e50; /* Dark grey background color */
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #3498db; /* Blue button color */
-            color: #fff; /* White button text color */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
         }
     </style>
 </head>
 <body>
 
-<div id="video-container">
-    <video id="video" autoplay playsinline></video>
-</div>
+<div id="interactive" class="viewport"></div>
 
-<button onclick="toggleCamera()">Switch Camera</button>
-<button onclick="scanQRCode()">Scan QR Code</button>
-
-<script src="https://rawgit.com/sitepoint-editors/html5-qrcode/v1.2.0/dist/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.23.0"></script>
+<script src="https://unpkg.com/ngx-scanner@3.1.1"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const videoElement = document.getElementById('video');
-        let currentFacingMode = 'user';
-        let html5Qrcode;
+        const scanner = new ZXing.BrowserQRCodeReader();
 
-        // Function to toggle between front and back cameras
-        window.toggleCamera = function () {
-            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
-
-            // Re-initialize the camera stream with the new facingMode
-            stopHtml5Qrcode();
-            startHtml5Qrcode();
-        };
-
-        // Function to start the HTML5 QR code reader
-        window.startHtml5Qrcode = function () {
-            html5Qrcode = new Html5Qrcode('video');
-            html5Qrcode.start(
-                currentFacingMode,
-                { facingMode: { exact: currentFacingMode } },
-                (code) => {
-                    alert('QR Code scanned: ' + code);
-                    stopHtml5Qrcode();
-                },
-                (error) => {
-                    console.error('Error scanning QR code:', error);
-                }
-            );
-        };
-
-        // Function to stop the HTML5 QR code reader
-        window.stopHtml5Qrcode = function () {
-            if (html5Qrcode) {
-                html5Qrcode.stop();
-            }
-        };
-
-        // Function to scan QR code once
-        window.scanQRCode = function () {
-            if (html5Qrcode) {
-                html5Qrcode.scan();
-            }
-        };
-
-        // Check if getUserMedia is available
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            startHtml5Qrcode();
-        } else {
-            console.error('getUserMedia is not supported in this browser');
-        }
+        scanner.getVideoInputDevices()
+            .then((videoInputDevices) => {
+                const deviceId = videoInputDevices[1].deviceId; // Use the back camera
+                scanner.decodeFromInputVideoDevice(deviceId, 'interactive', (result, err) => {
+                    if (result) {
+                        // QR code detected, result contains the decoded information
+                        console.log(result.getText());
+                        // You can navigate to the URL or perform any action based on the result
+                        // window.location.href = result.getText();
+                    } else if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.error(err);
+                    }
+                });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     });
 </script>
 
