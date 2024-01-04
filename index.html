@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Hello and Camera Page</title>
     <style>
         body {
@@ -23,6 +23,16 @@
             width: 100%;
             height: 100%;
         }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -30,18 +40,31 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const helloElement = document.createElement("div");
+        const buttonElement = document.createElement("button");
+
         document.body.appendChild(helloElement);
+        document.body.appendChild(buttonElement);
 
         helloElement.textContent = "Hello";
+        buttonElement.textContent = "Access Camera";
 
         // Show "Hello" for 5 seconds
         setTimeout(() => {
             // Hide the "Hello" text
             helloElement.style.display = "none";
 
+            // Show the button
+            buttonElement.style.display = "block";
+        }, 5000);
+
+        // Event listener for the button
+        buttonElement.addEventListener("click", () => {
             // Access the user's camera
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then((stream) => {
+                    // Hide the button
+                    buttonElement.style.display = "none";
+
                     // Display the camera stream in a video element
                     const video = document.createElement("video");
                     document.body.appendChild(video);
@@ -51,7 +74,7 @@
                 .catch((error) => {
                     console.error('Error accessing the camera:', error);
                 });
-        }, 5000);
+        });
     });
 </script>
 
